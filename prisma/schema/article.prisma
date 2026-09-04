@@ -1,0 +1,4 @@
+model Article{
+     id String @id @default(uuid())
+     
+}
