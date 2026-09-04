@@ -1,0 +1,22 @@
+model Article{
+     id String @id @default(uuid())
+     title String
+     description String
+     status Status @default(DRAFT)
+     author Author @relation(fields: [authorId], references: [id])
+     authorId String
+     category Category @relation(fields: [categoryId], references: [id])
+     categoryId String
+     comments Comment[]
+     tags Tag[]
+     deletedAt DateTime?
+     createdAt DateTime @default(now())
+     publishedAt DateTime? 
+     updatedAt DateTime @updatedAt
+
+}
+
+enum Status {
+    DRAFT
+    PUBLISHED
+}
