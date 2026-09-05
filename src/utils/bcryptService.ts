@@ -8,6 +8,7 @@ export class BcryptService{
          try {
             return await bcrypt.hash(password,10)
          } catch (error) {
+            console.log(error)
             throw new InternalServerErrorException("Failed to hash password")
          }
      }
@@ -15,6 +16,7 @@ export class BcryptService{
            try { 
                return await bcrypt.compare(password,hashedPassword)
            } catch (error) {
+               console.log(error)
                throw new InternalServerErrorException("Failed to verify password")
            }
      }
