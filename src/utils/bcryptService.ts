@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 
 export class BcryptService{
        
-     async hashPassword(password: string){
+     async hashPassword(password: string):Promise<string>{
          try {
             return await bcrypt.hash(password,10)
          } catch (error) {
@@ -12,7 +12,7 @@ export class BcryptService{
             throw new InternalServerErrorException("Failed to hash password")
          }
      }
-     async matchPassword(password: string, hashedPassword: string){
+     async matchPassword(password: string, hashedPassword: string):Promise<boolean>{
            try { 
                return await bcrypt.compare(password,hashedPassword)
            } catch (error) {
