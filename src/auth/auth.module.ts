@@ -4,9 +4,9 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtService } from 'src/utils/jwtService';
 import { BcryptService } from 'src/utils/bcryptService';
-
+import {PassportModule} from '@nestjs/passport'
 @Module({
-  imports: [UserModule],
+  imports: [UserModule, PassportModule.register({defaultStrategy: 'jwt'})],
   providers: [AuthService,JwtService,BcryptService],
   controllers: [AuthController],
   exports:[AuthService]
