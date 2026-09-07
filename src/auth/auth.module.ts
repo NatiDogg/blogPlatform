@@ -4,9 +4,10 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtService } from 'src/utils/jwtService';
 import { BcryptService } from 'src/utils/bcryptService';
+import { AuthCommonModule } from 'src/auth-shared-module/auth-shared-module.module';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule,AuthCommonModule],
   providers: [AuthService,JwtService,BcryptService],
   controllers: [AuthController],
   exports:[AuthService]
