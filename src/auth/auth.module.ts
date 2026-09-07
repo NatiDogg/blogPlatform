@@ -4,13 +4,12 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtService } from 'src/utils/jwtService';
 import { BcryptService } from 'src/utils/bcryptService';
-import {PassportModule} from '@nestjs/passport'
-import { JwtStrategy } from './strategies/jwtStrategy';
-import { RolesGuard } from './guards/rolesGuard';
+import { AuthCommonModule } from 'src/auth-shared-module/auth-shared-module.module';
+
 @Module({
-  imports: [UserModule, PassportModule.register({defaultStrategy: 'jwt'})],
-  providers: [AuthService,JwtService,BcryptService,JwtStrategy,RolesGuard],
+  imports: [UserModule,AuthCommonModule],
+  providers: [AuthService,JwtService,BcryptService],
   controllers: [AuthController],
-  exports:[AuthService,RolesGuard,PassportModule,JwtStrategy]
+  exports:[AuthService]
 })
 export class AuthModule {}
