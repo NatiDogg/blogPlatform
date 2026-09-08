@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,Get } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards,Get, Delete, Patch, ParseUUIDPipe, Param } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { Roles } from 'src/auth/decorators/rolesDecorator';
 import { Role } from 'prisma/generated/prisma/enums';
@@ -18,38 +18,44 @@ export class ArticleController {
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Post('')
-       async createArticle(@Body() articleDetails:CreateArticleDto, @CurrentUser() user: Omit<User, 'password'>){
+        async createArticle(@Body() articleDetails:CreateArticleDto, @CurrentUser() user: Omit<User, 'password'>){
            return this.articleService.createArticle(articleDetails,user.id)
        }
 
        @Get()
        async getArticles(){
-
+            return await this.articleService.getArticles()
        }
        
        @Get(':id')
-       async getArticle(){
-
+       async getArticle(@Param('id',ParseUUIDPipe) id: string){
+           return await this.articleService.getArticle(id)
        }
 
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
-        @Get('me')
+       @Get('me')
        async getMyArticles(){
 
        }
+
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
-      
        @Get('me/:id')
        async getMyArticle(){
         
        }
-
+ 
+       @Roles(Role.AUTHOR)
+       @UseGuards(JwtAuthGuard,RolesGuard)
+       @Patch(':id')
        async updateArticle(){
 
        }
-
+ 
+       @Roles(Role.AUTHOR, Role.ADMIN)
+       @UseGuards(JwtAuthGuard,RolesGuard)
+       @Delete(':id')
        async deleteArticle(){
 
        }
