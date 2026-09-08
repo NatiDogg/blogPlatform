@@ -54,11 +54,18 @@ export class ArticleController {
        async updateArticle(@Param('id',ParseUUIDPipe) id: string,@Body() updateDetails: UpdateArticleDto, @CurrentUser() user: Omit<User, 'password'>){
                return await this.articleService.updateArticle(id,updateDetails, user.id)
        }
+
+       @Roles(Role.AUTHOR)
+       @UseGuards(JwtAuthGuard, RolesGuard)
+       @Patch('publish/:id')
+       async publishArticle(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: Omit<User, 'password'>){
+              return await this.articleService.publishArticle(id, user.id)
+       }
  
        @Roles(Role.AUTHOR, Role.ADMIN)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Delete(':id')
-       async deleteArticle(){
-
+       async deleteArticle(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: Omit<User, 'password'>){
+              return await this.articleService.deleteArticle(id, {id: user.id, role: user.role})
        }
 }

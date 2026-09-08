@@ -1,7 +1,7 @@
 import {  BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateArticleDto } from './dtos/createArticleDto';
-import { Prisma } from 'prisma/generated/prisma/client';
+import { Prisma, Role } from 'prisma/generated/prisma/client';
 import { QueryArticleDto } from './dtos/queryArticleDto';
 import { UpdateArticleDto } from './dtos/updateArticleDto';
 
@@ -88,7 +88,8 @@ export class ArticleService {
       const articles = await this.prisma.article.findMany({
              where: {
                    authorId
-             }
+             },
+             orderBy: {createdAt: 'desc'}
            })
             return {
              success: true,
@@ -115,11 +116,106 @@ export class ArticleService {
       }
 
       async updateArticle(articleId: string,updateDetails:UpdateArticleDto, authorId: string){
-             
+            try {
+                 const updatedArticle = await this.prisma.article.update({
+                  where: {
+                        id: articleId,
+                        authorId,
+                        deletedAt: null
+                  },
+                  data: {
+                        ...updateDetails
+
+                  },
+                  include: {
+                        category: true,
+                        tags: true
+                  }
+                 }) 
+                 return {
+                  success: true,
+                  message: "Article Updated Successfully",
+                  article: updatedArticle
+                 }
+            } catch (error) {
+               if(error instanceof Prisma.PrismaClientKnownRequestError){
+                  if(error.code === 'P2025'){
+                    throw new NotFoundException("Article not found or you do not have permission to update it.")
+                  }
+                  
+               }
+               throw error
+            }
       }
 
-      async deleteArticle(){
+      async publishArticle(articleId: string,authorId: string){
 
+            try {
+                  const publishedArticle = await this.prisma.article.update({
+                        where:{
+                              id: articleId,
+                              authorId,
+                              status: 'DRAFT',
+                              deletedAt: null,
+                             
+                        }, 
+                        data: {
+                               status: 'PUBLISHED',
+                               publishedAt: new Date()
+                        }})
+                        return {
+                          success: true,
+                          message: "Article Published Successfully",
+                            article: publishedArticle
+                         }
+                  
+            } catch (error) {
+                  if(error instanceof Prisma.PrismaClientKnownRequestError){
+                  if(error.code === 'P2025'){
+                    throw new NotFoundException("Article not found, already published, or you do not have permission to publish it")
+                  }
+                  
+               }
+               throw error
+            }
+   
+      }
+
+      async deleteArticle(articleId: string, user: {id: string, role: Role}){
+
+             try {
+                  const whereCondition = user.role === "AUTHOR" ? {
+                   id: articleId,
+                   authorId: user.id
+             } : {
+                  id: articleId
+             }
+            await this.prisma.article.update({
+                   where: {
+                        deletedAt: null,
+                         ...whereCondition
+                         
+
+                   },
+                   data: {
+                        deletedAt: new Date()
+
+                   }
+            })
+
+            return {
+                  success: true,
+                  message: 'Article Deleted Successfully'
+            }
+             } catch (error) {
+                  if(error instanceof Prisma.PrismaClientKnownRequestError){
+                  if(error.code === 'P2025'){
+                    throw new NotFoundException("Article not found, already deleted, or you do not have permission to delete it")
+                  }
+                  
+               }
+               throw error
+             }
       }
       
 }
