@@ -8,6 +8,7 @@ import { CreateArticleDto } from './dtos/createArticleDto';
 import { CurrentUser } from 'src/auth/decorators/currentUserDecorator';
 import { User } from 'prisma/generated/prisma/client';
 import { QueryArticleDto } from './dtos/queryArticleDto';
+import { UpdateArticleDto } from './dtos/updateArticleDto';
 
 
 @Controller('article')
@@ -36,22 +37,22 @@ export class ArticleController {
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Get('me')
-       async getMyArticles(){
-
+       async getMyArticles(@CurrentUser() user: Omit<User, 'password'>){
+             return await this.articleService.getMyArticles(user.id)
        }
 
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Get('me/:id')
-       async getMyArticle(){
-        
+       async getMyArticle(@Param('id',ParseUUIDPipe) id: string, @CurrentUser() user: Omit<User, 'password'> ){
+                return await this.articleService.getMyArticle(id, user.id)
        }
  
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Patch(':id')
-       async updateArticle(){
-
+       async updateArticle(@Body() updateDetails: UpdateArticleDto, @CurrentUser() user: Omit<User, 'password'>){
+               return await this.articleService.updateArticle(updateDetails, user.id)
        }
  
        @Roles(Role.AUTHOR, Role.ADMIN)
