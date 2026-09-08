@@ -71,22 +71,18 @@ export class ArticleService {
       }
 
       async getArticle(id: string){
-            try {
-                  const article =  await this.prisma.article.findUnique({
+              const article =  await this.prisma.article.findUnique({
                         where: {id, deletedAt: null, status: 'PUBLISHED'},
 
                   })
+                  if(!article){
+                         throw new NotFoundException("Article Not Found")
+                  }
                   return {
              success: true,
              message: "Article Retrieved Successfully",
              articles: article
           }
-            } catch (error) {
-                if(error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
-                  throw new NotFoundException("Article Not Found")
-                }
-                throw error
-            }
       }
       async getMyArticles(authorId: string){
       const articles = await this.prisma.article.findMany({
@@ -107,6 +103,9 @@ export class ArticleService {
                   authorId
             }
           })
+          if(!article){
+            throw new NotFoundException("Article Not Found")
+          }
 
           return {
              success: true,
@@ -115,8 +114,8 @@ export class ArticleService {
           }
       }
 
-      async updateArticle(updateDetails:UpdateArticleDto, authorId: string){
-
+      async updateArticle(articleId: string,updateDetails:UpdateArticleDto, authorId: string){
+             
       }
 
       async deleteArticle(){
