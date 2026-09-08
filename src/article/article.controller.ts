@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards,Get, Delete, Patch, ParseUUIDPipe, Param } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards,Get, Delete, Patch, ParseUUIDPipe, Param, Query } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { Roles } from 'src/auth/decorators/rolesDecorator';
 import { Role } from 'prisma/generated/prisma/enums';
@@ -7,6 +7,7 @@ import { RolesGuard } from 'src/auth/guards/rolesGuard';
 import { CreateArticleDto } from './dtos/createArticleDto';
 import { CurrentUser } from 'src/auth/decorators/currentUserDecorator';
 import { User } from 'prisma/generated/prisma/client';
+import { QueryArticleDto } from './dtos/queryArticleDto';
 
 
 @Controller('article')
@@ -23,8 +24,8 @@ export class ArticleController {
        }
 
        @Get()
-       async getArticles(){
-            return await this.articleService.getArticles()
+       async getArticles(@Query() queryDetails:QueryArticleDto){
+            return await this.articleService.getArticles(queryDetails)
        }
        
        @Get(':id')

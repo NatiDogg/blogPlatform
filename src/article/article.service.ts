@@ -1,7 +1,8 @@
-import {  BadRequestException, Injectable } from '@nestjs/common';
+import {  BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateArticleDto } from './dtos/createArticleDto';
 import { Prisma } from 'prisma/generated/prisma/client';
+import { QueryArticleDto } from './dtos/queryArticleDto';
 
 @Injectable()
 export class ArticleService {
@@ -38,16 +39,59 @@ export class ArticleService {
 
       }
 
-      async getArticles(){
+      async getArticles(query:QueryArticleDto){
+
+            const {title,category,sortBy= 'createdAt',sortOrder='desc'} = query
+
+             const titleCondition = title
+    ? { title: { contains: title, mode: 'insensitive' as const } }
+    : {};
+    const categoryCondition = category
+    ? {
+        category: {
+          name: {
+            equals: category,
+            mode: 'insensitive' as const,
+          },
+        },
+      }
+    : {};
+
+             
+             
+
+             
+
+           
+
+
+
+             
          
             return await this.prisma.article.findMany(
-                  {where: {status: 'PUBLISHED', deletedAt: null},
-                   include: {author: {include: {user: {omit: {password: true}}}}, category: true, comments: true, tags: true}})
+                  {where: { 
+                        
+                        status: 'PUBLISHED', 
+                         deletedAt: null,
+                        ...titleCondition,
+                        ...categoryCondition
+                  },
+                   include: {author: {include: {user: {omit: {password: true}}}}, category: true, comments: true, tags: true}, orderBy:{[sortBy] : sortOrder} })
 
       }
 
       async getArticle(id: string){
-                
+            try {
+                  return await this.prisma.article.findUnique({
+                        where: {id, deletedAt: null, status: 'PUBLISHED'},
+
+                  })
+            } catch (error) {
+                if(error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'){
+                  throw new NotFoundException("Article Not Found")
+                }
+                throw error
+            }
       }
       async getMyArticles(){
 
