@@ -11,6 +11,12 @@ export class CommentService {
        constructor(private prisma:PrismaService){}
 
        async addComment(articleId: string, userId: string,comment: AddCommentDto){
+          const article = await this.prisma.article.findUnique({
+        where: { id: articleId, status: 'PUBLISHED', deletedAt: null }
+    })
+        if(!article){
+               throw new NotFoundException("Article not found")
+        }
             const newlyAddedComment = await this.prisma.comment.create({data: {
                  userId,
                  articleId,
