@@ -58,7 +58,7 @@ export class ArticleService {
               }
                 : {};
 
-            return await this.prisma.article.findMany(
+            const articles = await this.prisma.article.findMany(
                   {where: { 
                         
                         status: 'PUBLISHED', 
@@ -67,6 +67,12 @@ export class ArticleService {
                         ...categoryCondition
                   },
                    include: {author: {include: {user: {omit: {password: true}}}}, category: true, comments: true, tags: true}, orderBy:{[sortBy] : sortOrder} })
+
+                   return {
+                        success: true,
+                        message: 'Articles Retrieved Successfully',
+                        articles: articles
+                   }
 
       }
 
@@ -81,7 +87,7 @@ export class ArticleService {
                   return {
              success: true,
              message: "Article Retrieved Successfully",
-             articles: article
+             article: article
           }
       }
       async getMyArticles(authorId: string){
