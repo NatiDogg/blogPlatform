@@ -5,7 +5,7 @@ import { RolesGuard } from 'src/auth/guards/rolesGuard';
 import { Roles } from 'src/auth/decorators/rolesDecorator';
 import { Role } from 'prisma/generated/prisma/enums';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
 
        constructor(private readonly userService:UserService){}

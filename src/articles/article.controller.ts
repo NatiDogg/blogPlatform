@@ -11,7 +11,7 @@ import { QueryArticleDto } from './dtos/queryArticleDto';
 import { UpdateArticleDto } from './dtos/updateArticleDto';
 
 
-@Controller('article')
+@Controller('articles')
 export class ArticleController {
 
        constructor(private readonly articleService:ArticleService){}

@@ -6,7 +6,7 @@ import { CurrentUser } from 'src/auth/decorators/currentUserDecorator';
 import { User } from 'prisma/generated/prisma/client';
 import { UpdateCommentDto } from './dtos/updateCommentDto';
 
-@Controller('comment')
+@Controller('comments')
 export class CommentController {
 
         constructor(private readonly commentService:CommentService){}
