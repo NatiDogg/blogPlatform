@@ -74,7 +74,7 @@ export class CommentService {
             }
        }
 
-       async deleteComment(commentId: string, articleId: string, user: {id: string, role: Role}){
+       async deleteComment(commentId: string, user: {id: string, role: Role}){
             
             try {
                 const isAdmin = user.role === 'ADMIN'
@@ -82,7 +82,7 @@ export class CommentService {
             const result = await this.prisma.comment.delete({
                 where: {
                      id: commentId,
-                     articleId: articleId,
+                     
                      ...(isAdmin ? {} : {
                          OR: [
                              {userId: user.id},
