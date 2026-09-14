@@ -11,12 +11,26 @@ import { ArticleModule } from './articles/article.module';
 import { CategoryModule } from './categories/category.module';
 import { CommentModule } from './comments/comment.module';
 import { TagsModule } from './tags/tags.module';
+import { ThrottlerModule,ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 @Module({
-  imports: [PrismaModule, ConfigModule.forRoot({
+  imports: [PrismaModule, 
+      ThrottlerModule.forRoot({
+         throttlers: [
+            {
+              ttl: 60000,
+              limit: 20
+            }
+         ]
+      })
+    ,ConfigModule.forRoot({
      isGlobal: true,
      validate
   }), AuthModule, UserModule, AuthCommonModule, ArticleModule, CategoryModule, CommentModule, TagsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+     provide: APP_GUARD,
+     useClass: ThrottlerGuard
+  }],
 })
 export class AppModule {}
