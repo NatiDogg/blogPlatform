@@ -15,6 +15,7 @@ model Article{
      updatedAt DateTime @updatedAt
 
   @@unique([id, authorId])
+ 
 }
 
 enum Status {

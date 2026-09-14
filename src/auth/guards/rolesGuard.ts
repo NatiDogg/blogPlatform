@@ -1,9 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "../decorators/rolesDecorator";
 import { Role } from "prisma/generated/prisma/enums";
 
-
+@Injectable()
 export class RolesGuard implements CanActivate{
        
         constructor(private reflector: Reflector){}

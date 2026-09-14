@@ -28,13 +28,7 @@ export class ArticleController {
        async getArticles(@Query() queryDetails:QueryArticleDto){
             return await this.articleService.getArticles(queryDetails)
        }
-       
-       @Get(':id')
-       async getArticle(@Param('id',ParseUUIDPipe) id: string){
-           return await this.articleService.getArticle(id)
-       }
-
-       @Roles(Role.AUTHOR)
+         @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
        @Get('me')
        async getMyArticles(@CurrentUser() user: Omit<User, 'password'>){
@@ -47,6 +41,13 @@ export class ArticleController {
        async getMyArticle(@Param('id',ParseUUIDPipe) id: string, @CurrentUser() user: Omit<User, 'password'> ){
                 return await this.articleService.getMyArticle(id, user.id)
        }
+       
+       @Get(':id')
+       async getArticle(@Param('id',ParseUUIDPipe) id: string){
+           return await this.articleService.getArticle(id)
+       }
+
+     
  
        @Roles(Role.AUTHOR)
        @UseGuards(JwtAuthGuard,RolesGuard)
