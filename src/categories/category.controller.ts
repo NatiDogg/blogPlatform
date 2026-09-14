@@ -7,7 +7,7 @@ import { Roles } from 'src/auth/decorators/rolesDecorator';
 import { CreateCategoryDto } from './dtos/createCategoryDto';
 import { UpdateCategoryDto } from './dtos/updateCategoryDto';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
 
        constructor(private readonly categoryService: CategoryService){}

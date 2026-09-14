@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dtos/registerDto';
 import { LoginDto } from './dtos/loginDto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/users/user.service';
 import { BcryptService } from 'src/utils/bcryptService';
 import { JwtService } from 'src/utils/jwtService';
 import { User } from 'prisma/generated/prisma/client';
