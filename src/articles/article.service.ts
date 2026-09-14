@@ -4,19 +4,28 @@ import { CreateArticleDto } from './dtos/createArticleDto';
 import { Prisma, Role } from 'prisma/generated/prisma/client';
 import { QueryArticleDto } from './dtos/queryArticleDto';
 import { UpdateArticleDto } from './dtos/updateArticleDto';
+import { TagsService } from 'src/tags/tags.service';
 
 @Injectable()
 export class ArticleService {
 
-       constructor(private prisma:PrismaService  ){}
+       constructor(private prisma:PrismaService, private readonly tagsService:TagsService  ){}
 
       async createArticle(articleDetails: CreateArticleDto, authorId: string){
-          
+          const {tags, ...restArticleDetails} = articleDetails
+
+          let tagConnections: {id: string}[] = []
+
+           if(tags && tags.length > 0){
+              const tagsResult = await this.tagsService.createTags({tags})
+              tagConnections = tagsResult.tags.map((tag)=> ({id: tag.id}))
+           }
           try {
         const newlyCreatedArticle = await this.prisma.article.create({
             data: {
-                ...articleDetails,
+                ...restArticleDetails,
                 authorId: authorId,
+                tags: tagConnections.length > 0 ? {connect: tagConnections} : undefined
             },
             include: {
                 author: {include:{user: {omit: {password: true}}}},
@@ -122,6 +131,13 @@ export class ArticleService {
       }
 
       async updateArticle(articleId: string,updateDetails:UpdateArticleDto, authorId: string){
+              const {tags, ...restUpdateDetails} = updateDetails
+              let tagConnections: { id: string }[] | undefined = undefined;
+              if (tags) {
+                const tagsResult = await this.tagsService.createTags({ tags });
+                tagConnections = tagsResult.tags.map((tag) => ({ id: tag.id }));
+              }
+
             try {
                  const updatedArticle = await this.prisma.article.update({
                   where: {
@@ -130,7 +146,8 @@ export class ArticleService {
                         deletedAt: null
                   },
                   data: {
-                        ...updateDetails
+                        ...restUpdateDetails,
+                        tags: tagConnections ? { set: tagConnections } : undefined
 
                   },
                   include: {
