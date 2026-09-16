@@ -13,6 +13,7 @@ import { CommentModule } from './comments/comment.module';
 import { TagsModule } from './tags/tags.module';
 import { ThrottlerModule,ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [PrismaModule, 
       ThrottlerModule.forRoot({
@@ -22,7 +23,13 @@ import { APP_GUARD } from '@nestjs/core';
               limit: 20
             }
          ]
+      }),
+      CacheModule.register({
+           isGlobal: true,
+           ttl: 30000,
+           max: 100
       })
+
     ,ConfigModule.forRoot({
      isGlobal: true,
      validate
