@@ -27,6 +27,16 @@ export class ArticleService {
          
         return `Article_Cache_key_${name}`
   }
+  private async invalidateAllExistingListCaches(){
+        console.log(`invalidating ${this.articleListCacheKeys.size} list cache entries`)
+
+        for(const key of this.articleListCacheKeys){
+            await this.cacheManager.del(key)
+        }
+
+        this.articleListCacheKeys.clear()
+        
+  }
 
   // Helper method to look up Author record by userId
   private async getAuthorByUserId(userId: string) {
@@ -85,6 +95,9 @@ export class ArticleService {
           category: true,
         },
       });
+
+      //invalidate the existing cache
+       await this.invalidateAllExistingListCaches()
 
       return {
         success: true,
@@ -161,6 +174,19 @@ export class ArticleService {
   }
 
   async getArticle(id: string) {
+     const cacheKey = this.generateArticleListCacheKeys(`getArticle_${id}`)
+     this.articleListCacheKeys.add(cacheKey)
+     const cachedArticle = await this.cacheManager.get(cacheKey)
+     if(cachedArticle){
+         console.log('Cache Hit --- and returning article from cache')
+
+         return {
+             success: true,
+              message: 'Article Retrieved Successfully',
+            article: cachedArticle,
+         }
+     }
+       console.log('Cache miss --- and returning article from db')
     const article = await this.prisma.article.findUnique({
       where: { id, deletedAt: null, status: 'PUBLISHED' },
       include: {
@@ -174,6 +200,8 @@ export class ArticleService {
     if (!article) {
       throw new NotFoundException('Article Not Found');
     }
+
+     await this.cacheManager.set(cacheKey, article, 60000)
 
     return {
       success: true,
@@ -263,6 +291,9 @@ export class ArticleService {
         },
       });
 
+      await this.cacheManager.del(`Article_${articleId}`)
+      await this.invalidateAllExistingListCaches()
+
       return {
         success: true,
         message: 'Article Updated Successfully',
@@ -335,6 +366,9 @@ export class ArticleService {
           deletedAt: new Date(),
         },
       });
+
+      await this.cacheManager.del(`Article_${articleId}`)
+      await this.invalidateAllExistingListCaches()
 
       return {
         success: true,
