@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,13 +12,21 @@ import { TagsService } from 'src/tags/tags.service';
 import { CreateArticleDto } from './dtos/createArticleDto';
 import { QueryArticleDto } from './dtos/queryArticleDto';
 import { UpdateArticleDto } from './dtos/updateArticleDto';
+import { CACHE_MANAGER,Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class ArticleService {
+    private articleListCacheKeys:Set<string> = new Set()
   constructor(
     private prisma: PrismaService,
     private readonly tagsService: TagsService,
+    @Inject(CACHE_MANAGER) private cacheManager:Cache
   ) {}
+
+  private generateArticleListCacheKeys = (name: string)=>{
+         
+        return `Article_Cache_key_${name}`
+  }
 
   // Helper method to look up Author record by userId
   private async getAuthorByUserId(userId: string) {
@@ -111,6 +120,21 @@ export class ArticleService {
         }
       : {};
 
+      const cacheKey = this.generateArticleListCacheKeys('GetArticles')
+
+      this.articleListCacheKeys.add(cacheKey)
+      const cachedArticles = await this.cacheManager.get(cacheKey)
+
+      if(cachedArticles){
+        console.log('Cache Hit --- and returning articles from cache')
+          return {
+           success: true,
+           message: 'Articles Retrieved Successfully',
+           articles: cachedArticles
+          };
+      }
+        console.log('Cache Miss --- and returning articles from db')
+
     const articles = await this.prisma.article.findMany({
       where: {
         status: 'PUBLISHED',
@@ -126,6 +150,8 @@ export class ArticleService {
       },
       orderBy: { [sortBy]: sortOrder },
     });
+
+    await this.cacheManager.set(cacheKey, articles,60000)
 
     return {
       success: true,
